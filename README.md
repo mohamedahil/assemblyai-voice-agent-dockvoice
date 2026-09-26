@@ -3,6 +3,8 @@
 **Receive shipments at the speed of speech.** A voice agent for the warehouse receiving dock, built
 on the [AssemblyAI Voice Agent API](https://www.assemblyai.com/docs/voice-agents/voice-agent-api).
 
+![DockVoice receiving cockpit during a live voice session](docs/pitch/assets/cockpit-live.png)
+
 A worker with full hands says:
 
 > "Receiving PO 4582 from ABC Electronics. We got eighty controllers, actually sorry, eight zero,
@@ -26,26 +28,23 @@ vendor about the shortage, due date included.
 
 ## Architecture
 
-```
-┌──────────── React + Vite (Vercel) ─────────────┐        ┌──── AssemblyAI Voice Agent API ────┐
-│ Mic → AudioWorklet (PCM16 @ 24 kHz)            │◄──WS──►│ STT (Universal-3 Pro) → LLM → TTS  │
-│ Playback · Voice orb · Live transcript         │        │ turn detection · barge-in          │
-│ Tool relay: tool.call → backend → tool.result  │        │ emits tool.call                    │
-└──────────────┬─────────────────────────────────┘        └────────────────────────────────────┘
-               │ REST: /voice/session (single-use token + agent config), /voice/sessions/{id}/tools/{name}
-┌──────────────▼──────────── FastAPI (Render) ───────────────────────────────┐
-│ agent/     system prompt · tool schemas · phase-based tool reveal          │
-│ services/  receiving state machine · vendor notifier · dashboard          │
-│ db/        SQLAlchemy models (PO, GRN, inventory, discrepancies, audit)    │
-└──────────────┬─────────────────────────────────────────────────────────────┘
-               ▼
-        Postgres (Supabase) · SQLite locally
-```
+![System architecture: browser, AssemblyAI Voice Agent API, FastAPI backend and Postgres](docs/pitch/assets/architecture.png)
 
 - The API key never leaves the server; the browser gets a **single-use token**.
 - The browser talks to AssemblyAI directly (lowest latency); the backend is plain REST, so it runs
   on free hosting with no long-lived connections.
 - Every tool call is recorded in an audit trail (see the **Agent Activity** page).
+
+## Tech stack
+
+| Layer | Technology |
+|---|---|
+| **Voice AI** | AssemblyAI Voice Agent API: Universal-3 Pro Streaming STT, LLM tool calling, TTS, turn detection and barge-in, keyterms + transcription prompt, far-field voice focus, single-use browser tokens |
+| **Frontend** | React 19, TypeScript (strict), Vite, Tailwind CSS v4, Motion, TanStack Query, Zustand, React Router, Recharts, Web Audio API + AudioWorklet |
+| **Backend** | Python 3.12, FastAPI, Pydantic v2, SQLAlchemy 2.0, psycopg 3, RapidFuzz (spoken item matching), httpx |
+| **Data & services** | PostgreSQL on Supabase (SQLite locally), Resend for vendor email |
+| **Hosting** | Vercel (frontend), Render (API), Supabase (database), UptimeRobot keep-alive: all free tier |
+| **Quality** | pytest, mypy (strict), Ruff, TypeScript strict, oxlint, GitHub Actions CI |
 
 ## The app
 
@@ -58,6 +57,25 @@ vendor about the shortage, due date included.
 | Inventory | Stock vs reorder point, live movement feed |
 | Discrepancies / Vendor Outbox | Shortages by status; the emails sent to vendors |
 | Agent Activity | Audit trail of every tool call with arguments and results |
+
+## Business model
+
+| | |
+|---|---|
+| **Who buys** | Mid-size distributors, 3PLs and manufacturers with 5–50 dock doors, already on an ERP (Business Central, NetSuite, SAP B1) but still receiving on paper or scanners. Buyer: operations manager. Champion: finance, for vendor recovery. |
+| **Market** | ~40,000 general warehousing businesses in the US alone (IBISWorld, 2025); warehouse software is a $3.4–5.7B market in 2025, growing ~15–20% a year (range across analyst reports). |
+| **Pricing** | $49 per dock door per month, all-inclusive: voice, ERP connector and vendor follow-ups. Two-week pilot on one door, then expand; sold through ERP partners. |
+
+**Worked example, one dock door per month** (illustrative assumptions: 10 receipts/day × 22 days, ~2 min of voice per receipt):
+
+| | |
+|---|---|
+| Labor saved: 220 receipts × 4 min × $25/h | +$367 |
+| Miscounts avoided: 2% of receipts × $50 (low end of the $50–250 industry estimate per error) | +$220 |
+| **Value to the customer** | **$587**, about **12x** the $49 price |
+| Our voice cost: 220 × 2 min × AssemblyAI's $4.50/h | ≈ $33, so ~33% gross margin at list voice pricing |
+
+This is before counting vendor credits recovered from documented shortages and damage.
 
 ## Run locally
 
