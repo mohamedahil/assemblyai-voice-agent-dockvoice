@@ -1,0 +1,163 @@
+@import 'tailwindcss';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ---- Design tokens ---------------------------------------------------------------------------
+   One accent (cyan), one agent color (violet) and three status colors. Every surface reads from
+   these variables so light and dark mode stay in sync. */
+
+:root {
+  --bg: #f4f6fb;
+  --bg-elevated: #ffffff;
+  --surface: rgb(255 255 255 / 0.78);
+  --surface-strong: #ffffff;
+  --surface-muted: rgb(15 23 42 / 0.04);
+  --border: rgb(15 23 42 / 0.09);
+  --border-strong: rgb(15 23 42 / 0.16);
+  --fg: #0b1220;
+  --fg-muted: #4b5875;
+  --fg-subtle: #8591ab;
+  --accent: #0891b2;
+  --accent-soft: rgb(8 145 178 / 0.12);
+  --agent: #7c3aed;
+  --agent-soft: rgb(124 58 237 / 0.12);
+  --success: #059669;
+  --success-soft: rgb(5 150 105 / 0.12);
+  --warning: #d97706;
+  --warning-soft: rgb(217 119 6 / 0.14);
+  --danger: #e11d48;
+  --danger-soft: rgb(225 29 72 / 0.12);
+  --grid-line: rgb(15 23 42 / 0.05);
+  --glow: rgb(8 145 178 / 0.18);
+  --shadow: 0 1px 2px rgb(15 23 42 / 0.06), 0 8px 24px -12px rgb(15 23 42 / 0.18);
+}
+
+.dark {
+  --bg: #060a13;
+  --bg-elevated: #0b1120;
+  --surface: rgb(17 24 39 / 0.62);
+  --surface-strong: #0f172a;
+  --surface-muted: rgb(148 163 184 / 0.06);
+  --border: rgb(148 163 184 / 0.12);
+  --border-strong: rgb(148 163 184 / 0.22);
+  --fg: #e6ebf5;
+  --fg-muted: #9aa6bf;
+  --fg-subtle: #5f6b85;
+  --accent: #22d3ee;
+  --accent-soft: rgb(34 211 238 / 0.12);
+  --agent: #a78bfa;
+  --agent-soft: rgb(167 139 250 / 0.14);
+  --success: #34d399;
+  --success-soft: rgb(52 211 153 / 0.12);
+  --warning: #fbbf24;
+  --warning-soft: rgb(251 191 36 / 0.13);
+  --danger: #fb7185;
+  --danger-soft: rgb(251 113 133 / 0.13);
+  --grid-line: rgb(148 163 184 / 0.05);
+  --glow: rgb(34 211 238 / 0.22);
+  --shadow: 0 1px 0 rgb(255 255 255 / 0.03) inset, 0 20px 40px -24px rgb(0 0 0 / 0.8);
+}
+
+@theme inline {
+  --font-sans: 'Geist', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  --color-bg: var(--bg);
+  --color-bg-elevated: var(--bg-elevated);
+  --color-surface: var(--surface);
+  --color-surface-strong: var(--surface-strong);
+  --color-surface-muted: var(--surface-muted);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-fg: var(--fg);
+  --color-fg-muted: var(--fg-muted);
+  --color-fg-subtle: var(--fg-subtle);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-agent: var(--agent);
+  --color-agent-soft: var(--agent-soft);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+
+  --shadow-panel: var(--shadow);
+}
+
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    @apply bg-bg font-sans text-fg antialiased;
+    font-feature-settings: 'ss01', 'cv11';
+  }
+
+  ::selection {
+    background: var(--accent-soft);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-strong) transparent;
+  }
+}
+
+@layer components {
+  /* Frosted panel used by every card. */
+  .panel {
+    @apply rounded-2xl border border-border bg-surface shadow-panel backdrop-blur-xl;
+  }
+
+  /* Faint blueprint grid behind the app. */
+  .bg-grid {
+    background-image:
+      linear-gradient(var(--grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size: 44px 44px;
+  }
+
+  .text-gradient {
+    background: linear-gradient(100deg, var(--accent), var(--agent));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .num {
+    @apply font-mono tabular-nums;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Print only the page content (e.g. a GRN document), not the app chrome. */
+@media print {
+  aside,
+  header,
+  [data-print-hide] {
+    display: none !important;
+  }
+
+  body {
+    background: white;
+  }
+}

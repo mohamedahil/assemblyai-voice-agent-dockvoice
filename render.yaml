@@ -1,0 +1,25 @@
+# Render blueprint for the FastAPI backend (free plan).
+services:
+  - type: web
+    name: dockvoice-api
+    runtime: python
+    plan: free
+    rootDir: backend
+    buildCommand: pip install .
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.7
+      - key: ASSEMBLYAI_API_KEY
+        sync: false
+      - key: DATABASE_URL
+        sync: false
+      - key: CORS_ORIGINS
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: VENDOR_EMAIL_OVERRIDE
+        sync: false
+      - key: AGENT_VOICE
+        value: michael
