@@ -17,6 +17,8 @@ class Settings(BaseSettings):
     vendor_email_override: str = ""
 
     agent_voice: str = "michael"
+    # Tablets on a loud dock pick up forklifts and conveyors: isolate the worker's voice.
+    voice_focus: str = "far-field"
     token_ttl_seconds: int = 300
     max_session_seconds: int = 1800
 

@@ -58,6 +58,7 @@ def create_voice_session(db: Session, settings: Settings) -> VoiceSessionOut:
             "input": {
                 "keyterms": build_keyterms(db),
                 "transcription_prompt": TRANSCRIPTION_PROMPT,
+                "voice_focus": settings.voice_focus,
             },
             "output": {"voice": settings.agent_voice},
         },
